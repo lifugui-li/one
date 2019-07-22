@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config></context:annotation-config>
+    <!--任务类-->
+    <!--<bean id="myJob" class="com.itheima.job.JobDemo"/>-->
+    <bean id="myJob" class="com.itheima.job.CleanImageJob"/>
+
+    <!--任务执行策略-->
+    <bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!--调用容器中的哪个bean-->
+        <property name="targetObject" ref="myJob"/>
+        <!--哪个方法-->
+        <property name="targetMethod" value="doCleanImage"/>
+        <!--禁止并发-->
+        <property name="concurrent" value="false"/>
+    </bean>
+
+    <!--触发器，触发后就会jobDetail 任务执行策略-->
+    <bean id="trigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <!--cronExpression: 七子表达: 秒 分 时 日 月 周 年-->
+        <property name="cronExpression" value="0/30 * * * * ? *"/>
+        <property name="jobDetail" ref="jobDetail"/>
+    </bean>
+
+    <!--任务调试器,容器, 如何 去触发 当前的时间值与触发器中的cronExpression表达的时间相同时-->
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="trigger"/>
+            </list>
+        </property>
+    </bean>
+
+    <import resource="classpath:spring-redis.xml"/>
+</beans>

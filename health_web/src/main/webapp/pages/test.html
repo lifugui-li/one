@@ -1,0 +1,286 @@
+﻿<html>
+<head>
+<meta charset="UTF-8">
+<!-- import CSS -->
+<link rel="stylesheet" href="../plugins/elementui/index.css">
+</head>
+<body>
+
+
+<div id="app">
+    <!--实现拖动两个div交换，name和sid-->
+    <el-row>
+
+        <div v-for="(c,idx) in roomTemplate" :key="idx">
+        <el-col :span='3'>
+            <div class="border" v-for='(row,index) in c.row' :key="index">
+                <span>{{row.data}}</span>
+				<!--:id="`${idx}-${index}`" 是为了将来容易找到它是第几列，第几个数据。idx为列，index为行
+					将来方便获取roomTemplate的数据
+				-->
+                <div  v-drag :id="`${idx}-${index}`">
+                    <span v-show="false">{{row.sid}}</span>
+                    {{row.name}}
+                </div>
+            </div>
+
+        </el-col>
+
+        </div>
+
+    </el-row>
+
+
+</div>
+
+</body>
+<!-- import Vue before Element -->
+<script src="../js/vue.js"></script>
+    <script src="../plugins/elementui/index.js"></script>
+<script>
+ var vm=new Vue({
+        el: '#app',
+		// 自定义指令drag
+		directives:{
+            drag(el,bindings){
+				// 鼠标点击
+                el.onmousedown = function(e){
+					// 记录当前div的id，id是标识为几列几列
+					vm.$data.sourceIndex = e.target.id;
+					// 以下操作可以移动div，这里我不实现，后期你可考虑实现两个DIV互换位置（互换两个div的x,y的值就可以）
+                    //var disx = e.pageX - el.offsetLeft;
+                    //var disy = e.pageY - el.offsetTop;
+					//el.style.position='absolute';
+                    document.onmousemove = function (e){
+                        //el.style.left = e.pageX - disx+'px';
+                        //el.style.top = e.pageY - disx+'px';
+                    }
+                    document.onmouseup = function(e){
+                        document.onmousemove = document.onmouseup = null;
+						//document.style.position='';
+						//alert(e.target.id)
+						// 获取目标div的id
+						vm.$data.targetIndex = e.target.id;
+						if(vm.$data.sourceIndex && vm.$data.targetIndex){
+							// 此处应该加上你说的那个available的判断
+							// 通过解析div的id，找出相应的数据
+							var arr = vm.$data.sourceIndex.split('-');
+							var oldData = vm.$data.roomTemplate[arr[0] * 1].row[arr[1]*1];
+							var arr2 = vm.$data.targetIndex.split('-');
+							var newData = vm.$data.roomTemplate[arr2[0] * 1].row[arr2[1]*1];
+							// 交换两个数据的name
+							var name = oldData.name;
+							oldData.name=newData.name;
+							newData.name=name;
+						}
+                    }
+                }
+            }
+        },
+        data: function () {
+            return {
+				sourceIndex: 0,
+				targetIndex: 0,
+                //教室模板
+                roomTemplate:[
+                    {
+                        columnNum:1,
+                        row:[
+                            {
+                                data: 1,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 2,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 3,
+                                name: null,
+                                available:0,
+                                sid:null
+                            },
+                            {
+                                data: 4,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 5,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 6,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+
+                        ]
+                    },
+                    {
+                        columnNum:2,
+                        row:[
+                            {
+                                data: 7,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 8,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 9,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 10,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 11,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 12,
+                                name: null,
+                                available:1,
+                                sid:null
+                            }
+                        ]
+                    },
+                    {
+                        columnNum:3,
+                        row:[
+                            {
+                                data: 13,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 14,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 15,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 16,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 17,
+                                name: null,
+                                available:1,
+                                sid:null
+                            },
+                            {
+                                data: 18,
+                                name: null,
+                                available:1,
+                                sid:null
+                            }
+                        ]
+                    }
+                ],
+                //学生集合
+                studentList:[{sid:1,name:"小花"},{sid:2,name:"小二"},{sid:3,name:"小三"},{sid:4,name:"小四"},{sid:5,name:"小五"},{sid:6,name:"小六"},{sid:7,name:"小七"},{sid:8,name:"小八"},{sid:9,name:"小九"},{sid:10,name:"小王"},{sid:11,name:"十一"},{sid:12,name:"十二"},{sid:13,name:"十三"},{sid:14,name:"十四"},{sid:15,name:"十五"}]
+            }
+        },
+        methods:{
+            aaa:function () {
+                var capacity = this.$options.methods.countCapacity(this.roomTemplate)
+                if (capacity<this.studentList.length){
+                    alert("学生人数大于教室容量")
+
+                }
+                //定义变量，表示学生数组下标
+                var k=0;
+
+                outer:
+                for (var i=0;i<this.roomTemplate.length;i++){
+                    inner:
+                    for (var j = 0; j <this.roomTemplate[i].row.length;j++){
+                        //如果该位置不可用，跳过内循环
+                        if (this.roomTemplate[i].row[j].available==0){
+                            continue inner;
+                        }
+                        //如果学生人数填不满教室，结束外循环
+                        if (k==this.studentList.length){
+                            break outer;
+                        }
+                        //循环复制
+                        this.roomTemplate[i].row[j].name=this.studentList[k].name;
+                        this.roomTemplate[i].row[j].sid=this.studentList[k].sid;
+                        k++;
+                    }
+                }
+
+            },
+            //统计教室可以坐下多少人
+            countCapacity:function (entity) {
+                var count=0;
+                for (var i=0;i<entity.length;i++) {
+                    for (var j=0;j<entity[i].row.length;j++){
+                        if (entity[i].row[j].available==1){
+                            count++;
+                        }
+                    }
+                }
+                return count;
+            },
+            //数组随机排序
+            shuffle:function (arr) {
+                var len = arr.length;
+                for (var i = 0; i < len - 1; i++) {
+                    var index = parseInt(Math.random() * (len - i));
+                    var temp = arr[index];
+                    arr[index] = arr[len - i - 1];
+                    arr[len - i - 1] = temp;
+                }
+                this.$options.methods.aaa();
+            },
+            //实现拖动两个div交换，name和sid
+            exchange:function () {
+
+            }
+        },
+        mounted:function () {
+            this.aaa()
+        }
+    })
+</script>
+</html>
+
+<style>
+    .border {
+        width: 50px;
+        border: 1px solid #3BCEC6;
+        margin: 10px;
+    }
+</style>

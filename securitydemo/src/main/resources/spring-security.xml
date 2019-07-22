@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <mvc:annotation-driven></mvc:annotation-driven>
+    <!--重要重要重要： 所有的路径，都必须以/打头-->
+
+    <!--security：none 匿名访问
+        pattern: 规则
+    -->
+    <security:http pattern="/css/*" security="none"/>
+    <security:http pattern="/login.html" security="none"/>
+    <security:http pattern="/fail.html" security="none"/>
+
+    <!--1. 拦截的规则-->
+    <!--  1.1 启用自动配置
+        auto-config: 启用自动配置    生成登陆页面，登陆处理
+        use-expressions: 是否使用spel表达式 false不使用 access的值 ROLO_...
+                       true:   hasRole...hasRole('ROLE_ADMIN')
+    -->
+    <security:http auto-config="true" use-expressions="true">
+        <!--1.2  设置拦截的规则
+        pattern: 匹配的路径规则 /** webapp目录下的所有子目录
+        access: 要访问规则内的内容就得拥有什么样的角色，才可以访问
+                角色名称必须以ROLE_打头，否则报错
+        -->
+        <!--<security:intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')"/>-->
+        <!--isAuthenticated认证过的才可以访问，登陆后才行-->
+        <security:intercept-url pattern="/a.html" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/index.html" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/b.html" access="hasAuthority('add')"/>
+
+        <security:intercept-url pattern="/c.html" access="hasRole('ROLE_ADMIN')"/>
+        <!--hasRole 如果表达式中没有ROLE_,自动补上 SecurityExpressionRoot.hasAnyRole-->
+        <security:intercept-url pattern="/d.html" access="hasRole('ADMIN')"/>
+
+        <!--登陆相关的配置
+            login-page: 定义登陆的页面
+            login-processing-url: 登陆验证处理
+            default-target-url: 登陆成功后默认跳转的页面
+            always-use-default-target: true 登陆成功后总是跳转到默认的页面
+            username-parameter: form表单中用户名的input标签名称  request.getParameter("")
+            password-parameter: form表单中密码的input标签名称
+        -->
+        <security:form-login
+                username-parameter="username"
+                password-parameter="password"
+            login-page="/login.html"
+            login-processing-url="/login"
+            default-target-url="/index.html"
+            always-use-default-target="false"
+            authentication-failure-url="/fail.html"
+        ></security:form-login>
+
+        <!--关闭跨域请求限制-->
+        <security:csrf disabled="true"/>
+
+        <!--退出登陆 logout-success-url 退出成功后跳转的地址
+            invalidate-session: 使用session失效
+        -->
+        <security:logout logout-success-url="/login.html" invalidate-session="true" logout-url="/logout"/>
+    </security:http>
+
+    <!--开启权限控制注解支持-->
+    <security:global-method-security pre-post-annotations="enabled"/>
+    <!--2 认证管理器-->
+    <security:authentication-manager>
+        <!--2.1 认证（用户）信息由谁来提供
+        user-service-ref: 引用容器中某个bean对象, 实现数据库认证业务
+        -->
+        <security:authentication-provider user-service-ref="userService">
+            <!--2.2 服务者
+            <security:user-service>
+                2.3 提供一个写死的用户信息, 用户名name 与密码password
+                    authorities 权限信息
+                    {noop} 不需要加密的操作，用明文就可以了
+
+                <security:user name="admin" password="{noop}123" authorities="ROLE_ADMIN"/>
+            </security:user-service>
+             -->
+            <!--密码加密器, 验证密码-->
+            <security:password-encoder ref="encoder"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+    <context:component-scan base-package="com.itheima"/>
+
+    <bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+</beans>
